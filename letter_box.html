@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letters For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --crimson: #d87093;
+    --deep-red: #c2597d;
+    --blush: #fff0f3;
+    --petal: #ffd6de;
+    --gold: #f5a7bc;
+    --ink: #5c4033;
+    --white: #fff8fb;
+  }
+
+  body {
+    background: #fff0f3;
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── LANDING PAGE ─── */
+  #landing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fff0f3 0%, #ffd6de 40%, #ffb6c1 100%);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  #landing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(216,112,147,0.12) 0%, transparent 70%);
+  }
+
+  .landing-inner {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    position: relative;
+    z-index: 2;
+    animation: fadeUp 1.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── ENVELOPE ANIMATION ─── */
+  .landing-envelope {
+    position: relative;
+    width: 300px;
+    height: 190px;
+    flex-shrink: 0;
+    perspective: 900px;
+    transform-style: preserve-3d;
+  }
+
+  /* 1. Back of the envelope (The dark inside) */
+  .env-back {
+    position: absolute;
+    inset: 0;
+    background: #c2597d;
+    border-radius: 12px;
+    box-shadow: 0 16px 50px rgba(216,112,147,0.45);
+    z-index: 1;
+  }
+
+  /* 2. Letter inside the pocket */
+  .env-letter {
+    position: absolute;
+    bottom: 15px; 
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    width: 240px;
+    background: #fff8fb;
+    border-radius: 8px;
+    padding: 18px 16px 14px;
+    box-shadow: 0 4px 20px rgba(216,112,147,0.25);
+    font-family: 'Great Vibes', cursive;
+    font-size: 1.4rem;
+    color: #d87093;
+    text-align: center;
+    transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 3; /* Behind the front folds */
+    line-height: 1.4;
+    border: 1px solid rgba(216,112,147,0.2);
+  }
+
+  .env-letter.rise {
+    transform: translateX(-50%) translateY(-130px);
+  }
+
+  .env-letter-lines {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .env-letter-line {
+    height: 2px;
+    background: rgba(216,112,147,0.2);
+    border-radius: 2px;
+  }
+
+  /* 3. Front solid folds (Creates the opaque pocket) */
+  .env-front {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    z-index: 4; /* Covers the letter completely */
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .env-fold-side {
+    position: absolute;
+    top: 0; bottom: 0; width: 50%;
+    background: #e888a0;
+  }
+  .env-fold-side.left {
+    left: 0;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+  .env-fold-side.right {
+    right: 0;
+    clip-path: polygon(100% 0, 0 50%, 100% 100%);
+  }
+  .env-fold-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 60%;
+    background: #d87093;
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  }
+
+  /* 4. Top Flap */
+  .env-flap {
+    position: absolute;
+    top: 0; left: 0;
+    width: 300px; height: 120px;
+    background: #f4b8c8;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    border-radius: 12px 12px 0 0;
+    transform-origin: top center;
+    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.2s;
+    z-index: 5; /* Highest until opened */
+    filter: drop-shadow(0 4px 6px rgba(216,112,147,0.3));
+  }
+
+  .env-flap.open {
+    transform: rotateX(180deg);
+    z-index: 2; /* Drops behind the letter but over the back inside */
+    filter: none; 
+  }
+
+  /* Wax seal */
+  .wax-seal {
+    position: absolute;
+    top: 90px; left: 50%;
+    transform: translateX(-50%);
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #f7b8cc, #d87093);
+    box-shadow: 0 4px 18px rgba(216,112,147,0.5), inset 0 1px 4px rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    z-index: 6; 
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    color: #fff;
+  }
+
+  .wax-seal.popped {
+    transform: translateX(-50%) scale(0) rotate(45deg);
+    opacity: 0;
+  }
+
+  /* Flowers */
+  .flower {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.85;
+    color: #d87093;
+    animation: sway 4s ease-in-out infinite;
+  }
+  .flower-1 { top: 20px; right: -10px; animation-delay: 0s; }
+  .flower-2 { bottom: 10px; right: 30px; animation-delay: 1.5s; font-size: 20px; }
+
+  @keyframes sway {
+    0%,100% { transform: rotate(-5deg) scale(1); }
+    50%      { transform: rotate(5deg) scale(1.08); }
+  }
+
+  #landing.fade-out { animation: landingFade 0.7s ease forwards; }
+  #landing.is-opening { pointer-events: none; }
+  @keyframes landingFade {
+    from { opacity:1; transform: scale(1); }
+    to   { opacity:0; transform: scale(1.04); }
+  }
+
+  /* Confetti burst */
+  .confetti-dot {
+    position: fixed;
+    pointer-events: none;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: confettiFly 1.2s ease-out forwards;
+    z-index: 9999;
+  }
+  @keyframes confettiFly {
+    0%   { opacity:1; transform: translate(0,0) scale(1) rotate(0deg); }
+    100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0.3) rotate(360deg); }
+  }
+
+  /* Title */
+  .landing-title { text-align: left; }
+  .landing-title h1 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 4.5rem;
+    line-height: 1.05;
+    color: #5c4033;
+    letter-spacing: 1px;
+  }
+  .landing-title .flowers-inline {
+    display: inline-block;
+    font-size: 2rem;
+    color: #d87093;
+    vertical-align: middle;
+    margin-left: 8px;
+    animation: sway 3s ease-in-out infinite;
+  }
+  .landing-hint {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: rgba(216,112,147,0.7);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-style: italic;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  /* ─── GRID PAGE ─── */
+  #grid-page {
+    display: none;
+    min-height: 100vh;
+    padding: 3rem 2rem;
+    background: linear-gradient(160deg, #f9f0f2 0%, #ede0e4 100%);
+    position: relative;
+  }
+
+  .grid-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .grid-header h2 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 3rem;
+    color: var(--ink);
+  }
+  .grid-header p {
+    margin-top: 0.5rem;
+    font-style: italic;
+    color: rgba(42,20,20,0.55);
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .card {
+    animation: fadeUp 0.7s ease both;
+    cursor: pointer;
+    position: relative;
+    perspective: 800px;
+  }
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+  .card:nth-child(5) { animation-delay: 0.5s; }
+  .card:nth-child(6) { animation-delay: 0.6s; }
+
+  .card-env {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 10px;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    z-index: 2;
+  }
+
+  .card:hover .card-env {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 24px 55px rgba(216,112,147,0.35);
+  }
+
+  /* Solid layers for grid cards */
+  .card-env-back {
+    position: absolute;
+    inset: 0;
+    background: #c2597d; /* Dark shadow inside */
+    border-radius: 10px;
+    z-index: 1;
+  }
+
+  /* The actual white letter inside */
+  .paper-peek {
+    position: absolute;
+    bottom: 10%; 
+    left: 50%;
+    transform: translateX(-50%) translateY(0px);
+    width: 75%;
+    height: 65%;
+    background: linear-gradient(to bottom, #fff8fb, #ffeef3);
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 -2px 12px rgba(216,112,147,0.15);
+    z-index: 2; /* Sits behind front pocket */
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    font-family: 'Great Vibes', cursive;
+    font-size: 1rem;
+    color: #d87093;
+    pointer-events: none;
+  }
+
+  .card-env-front {
+    position: absolute;
+    inset: 0;
+    background: #e888a0;
+    /* Perfect V-notch pocket */
+    clip-path: polygon(0 40%, 50% 65%, 100% 40%, 100% 100%, 0 100%);
+    border-radius: 10px;
+    z-index: 3;
+  }
+
+  .card-env-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #f4b8c8;
+    clip-path: polygon(0 0, 100% 0, 50% 60%);
+    border-radius: 10px 10px 0 0;
+    z-index: 4;
+    transform-origin: top center;
+    transition: transform 0.4s ease, z-index 0s 0.15s;
+  }
+
+  .card-seal {
+    position: absolute;
+    top: 30%; right: 50%;
+    transform: translate(50%, -50%);
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, #f7b8cc, #d87093);
+    box-shadow: 0 4px 14px rgba(216,112,147,0.5), inset 0 1px 3px rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    z-index: 5;
+    transition: opacity 0.3s, transform 0.4s ease;
+  }
+
+  /* Opened states */
+  .card.opened .card-env-flap {
+    transform: rotateX(180deg);
+    z-index: 1; /* Drop flap to the back */
+  }
+  .card.opened .card-seal { opacity: 0; }
+  .card:hover .paper-peek,
+  .card.opened .paper-peek {
+    transform: translateX(-50%) translateY(-35%);
+  }
+
+  .card-label {
+    margin-top: 0.75rem;
+    text-align: center;
+  }
+  .card-btn {
+    display: inline-block;
+    padding: 0.35rem 1.2rem;
+    border: 1.5px solid var(--crimson);
+    border-radius: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem;
+    color: var(--crimson);
+    letter-spacing: 0.5px;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s;
+    font-style: italic;
+  }
+  .card.opened .card-btn {
+    background: var(--crimson);
+    color: var(--white);
+  }
+  .card-btn:hover {
+    background: var(--crimson);
+    color: var(--white);
+  }
+
+  /* ─── LETTER PAGE ─── */
+  #letter-page {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+  .letter-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .letter-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 3rem 2rem;
+  }
+  .letter-inner {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    animation: fadeUp 0.9s ease both;
+  }
+  .letter-image {
+    font-size: 6rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 6px 20px rgba(0,0,0,0.3));
+    animation: floatImg 3s ease-in-out infinite;
+  }
+  @keyframes floatImg {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .letter-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--white);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    max-width: 400px;
+    margin: 0 auto 2rem;
+    white-space: pre-wrap;
+  }
+  .back-btn {
+    display: inline-block;
+    padding: 0.5rem 1.8rem;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+    backdrop-filter: blur(4px);
+  }
+  .back-btn:hover {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+
+  .theme-miss   { background: linear-gradient(160deg, #2c3e50 0%, #8B1A1A 60%, #6B0F0F 100%); }
+  .theme-hug    { background: linear-gradient(160deg, #8B1A1A 0%, #c0392b 50%, #8B1A1A 100%); }
+  .theme-badday { background: linear-gradient(160deg, #1a1a2e 0%, #4a1942 60%, #8B1A1A 100%); }
+  .theme-smile  { background: linear-gradient(160deg, #e67e22 0%, #c0392b 60%, #8B1A1A 100%); }
+  .theme-future { background: linear-gradient(160deg, #6c3483 0%, #c0392b 60%, #8B1A1A 100%); }
+  .theme-home   { background: linear-gradient(160deg, #273746 0%, #8a2be2 60%, #8B1A1A 100%); }
+
+  .sparkle {
+    position: absolute;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.2rem;
+    animation: twinkle 2.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0; transform: scale(0.5); }
+    50%      { opacity: 1; transform: scale(1.2); }
+  }
+
+  .petal-float {
+    position: fixed;
+    pointer-events: none;
+    font-size: 1rem;
+    opacity: 0;
+    animation: petalFall linear infinite;
+    z-index: 0;
+  }
+  @keyframes petalFall {
+    0%   { opacity: 0; transform: translateY(-20px) rotate(0deg); }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+  }
+
+  /* ─── MOBILE RESPONSIVENESS ─── */
+  @media (max-width: 768px) {
+    /* Landing Page Mobile Fixes */
+    .landing-inner {
+      flex-direction: column; /* Stacks the envelope and the text on top of each other */
+      text-align: center;
+      gap: 1.5rem;
+    }
+    
+    .landing-title {
+      text-align: center;
+    }
+    
+    .landing-title h1 {
+      font-size: 3.5rem; /* Smaller font for mobile */
+    }
+
+    .landing-envelope {
+      transform: scale(0.9); /* Slightly smaller envelope to ensure it fits safely */
+    }
+
+    /* Grid Page Mobile Fixes */
+    #grid-page {
+      padding: 2rem 1rem;
+    }
+
+    .grid-header h2 {
+      font-size: 2.5rem;
+    }
+
+    .cards-grid {
+      /* Allows cards to wrap nicely or stack if the screen is very small */
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .card-btn {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.8rem;
+    }
+
+    /* Letter Detail Page Fixes */
+    .letter-content {
+      padding: 2rem 1rem;
+    }
+
+    .letter-image {
+      font-size: 4.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .letter-text {
+      font-size: 1.1rem;
+      padding: 0 10px;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<section id="landing" onclick="showGrid()">
+  <div class="landing-inner">
+  <div class="landing-envelope" id="envWrap">
+    <div class="env-back"></div>
+    
+    <div class="env-letter" id="envLetter">
+      For You 🌸
+      <div class="env-letter-lines">
+        <div class="env-letter-line" style="width:80%"></div>
+        <div class="env-letter-line" style="width:60%"></div>
+        <div class="env-letter-line" style="width:70%"></div>
+      </div>
+    </div>
+    
+    <div class="env-front">
+      <div class="env-fold-side left"></div>
+      <div class="env-fold-side right"></div>
+      <div class="env-fold-bottom"></div>
+    </div>
+    
+    <div class="env-flap" id="envFlap"></div>
+    <div class="wax-seal" id="waxSeal">♡</div>
+    <div class="flower flower-1">✽</div>
+    <div class="flower flower-2">❋</div>
+  </div>
+
+    <div class="landing-title">
+      <h1>Letters<br>For You <span class="flowers-inline">✽</span></h1>
+      <p class="landing-hint">tap to open</p>
+    </div>
+  </div>
+</section>
+
+<section id="grid-page">
+  <div class="grid-header">
+    <h2>Letters For You ✽</h2>
+    <p>open when you need it most</p>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid">
+    </div>
+</section>
+
+<section id="letter-page">
+  <div class="letter-bg" id="letterBg"></div>
+  <div class="letter-content">
+    <div class="letter-inner">
+      <div class="letter-image" id="letterImg"></div>
+      <p class="letter-text" id="letterText"></p>
+      <button class="back-btn" onclick="showGrid()">← Back</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const letters = [
+    {
+      label: "Open when you miss me",
+      theme: "theme-miss",
+      img: "🫶",
+      sparkles: ["✦","✦","✧","✦","✧"],
+      text: "Just a reminder: I’m only one text away, always right by your side. Lots of kisses waiting when you come back.\n\nI miss you so much, but nothing about us is incomplete. We keep choosing each other, and even this distance only makes us fonder.\n\nI love you <3"
+    },
+    {
+      label: "Open when you need hug",
+      theme: "theme-hug",
+      img: "🫂",
+      sparkles: ["✦","✧","✦","✧","✦"],
+      text: "Come here… close your eyes and imagine me holding you tight. No chaos, no pressure—just us.\n\nYou are my pure comfort, the one place where I can let my guard down. You’re my home.\n\nAll my warmest hugs are for you."
+    },
+    {
+      label: "Open when you had a bad day",
+      theme: "theme-badday",
+      img: "🩹",
+      sparkles: ["✧","✦","✧","✦","✧"],
+      text: "If today felt too heavy, come sit with me for a moment. I wish I could sit beside you, listen to everything, and just hold your hand quietly.\n\nYou don’t have to be strong all the time. Breathe. It’s okay to feel tired and off on some days. You’re doing better than you think, and I’m here with you through all of it.\n\nPucchisss <333"
+    },
+    {
+      label: "Open when you need a smile",
+      theme: "theme-smile",
+      img: "🌻",
+      sparkles: ["✨","⭐","✨","⭐","✨"],
+      text: "Hieee my idiot \nIf you’re not smiling right now, let’s fix that. I still remember how we met—those two completely unexpected days, no planning, and yet everything felt so perfect. You not letting go of my hand.\n\nI promise we’ll hold on to each other through everything, just like that. And yes, I’ll keep stealing your food for life (still denying the Maggi case). I love your giggles after you ragebait me, and I love that smile of yours. So… smile now, please."
+    },
+    {
+      label: "Open when you think about our future",
+      theme: "theme-future",
+      img: "🤍",
+      sparkles: ["✨","✦","✧","✨","✦"],
+      text: "Thinking about our future doesn’t scare me—it feels right. We met just before you left, and still everything kept falling into place. Like us was always meant to happen. Distance is only one chapter, not the whole story.\n\nI think about us beyond the calls, the waiting, and the missing. I can see it clearly: a life where distance doesn’t exist, where we don’t have to end video calls. And somehow, that day doesn’t feel far.\n\nDon’t worry."
+    },
+    {
+      label: "Open when you long for home",
+      theme: "theme-home",
+      img: "🏡",
+      sparkles: ["✧","⭐","✦","✧","⭐"],
+      text: "If you’re missing home a little too much today, I wish I could take even a little of that feeling away.\n\nI know it isn’t easy being far from everything familiar. But you’re not as alone as it feels. Even on heavy days, you have me—someone who sees you and holds you close from miles away. You don’t have to rush through anything. Sit with it. You’re doing okay, and you’re exactly where you need to be right now.\n\nCome back to me anytime you need a little more ease.\n\nI hope this helps :)"
+    }
+  ];
+
+  const opened = new Set();
+
+  function buildGrid() {
+    const grid = document.getElementById('cardsGrid');
+    grid.innerHTML = '';
+    letters.forEach((l, i) => {
+      const isOpen = opened.has(i);
+      grid.innerHTML += `
+        <div class="card ${isOpen ? 'opened' : ''}" onclick="openLetter(${i})">
+          <div class="card-env">
+            <div class="card-env-back"></div>
+            <div class="paper-peek">For You</div>
+            <div class="card-env-front"></div>
+            <div class="card-env-flap"></div>
+            <div class="card-seal">✿</div>
+          </div>
+          <div class="card-label">
+            <span class="card-btn">${isOpen ? 'Opened' : l.label}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  let envelopeOpened = false;
+  let envelopeAnimating = false;
+  let envelopeTimers = [];
+
+  function clearEnvelopeTimers() {
+    envelopeTimers.forEach((timerId) => clearTimeout(timerId));
+    envelopeTimers = [];
+  }
+
+  function queueEnvelopeStep(callback, delay) {
+    const timerId = setTimeout(callback, delay);
+    envelopeTimers.push(timerId);
+  }
+
+  function showGrid() {
+    const landing = document.getElementById('landing');
+    const gridPage = document.getElementById('grid-page');
+    const letterPage = document.getElementById('letter-page');
+
+    if (envelopeAnimating) return;
+
+    if (envelopeOpened) {
+      letterPage.style.display = 'none';
+      gridPage.style.display = 'block';
+      buildGrid(); spawnPetals(); return;
+    }
+
+    envelopeAnimating = true;
+    envelopeOpened = true;
+    landing.classList.add('is-opening');
+    clearEnvelopeTimers();
+
+    /* Stage 1: Wax seal pops off */
+    const seal = document.getElementById('waxSeal');
+    if (seal) seal.classList.add('popped');
+
+    /* Stage 2: Flap opens */
+    queueEnvelopeStep(() => {
+      const flap = document.getElementById('envFlap');
+      if (flap) flap.classList.add('open');
+    }, 200);
+
+    /* Stage 3: Letter rises */
+    queueEnvelopeStep(() => {
+      const letter = document.getElementById('envLetter');
+      if (letter) letter.classList.add('rise');
+    }, 700);
+
+    /* Stage 4: Confetti burst */
+    queueEnvelopeStep(() => {
+      const colors = ['#f7a8b8','#c93030','#fff0f3','#ffd6de','#a01515'];
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      for (let i = 0; i < 22; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'confetti-dot';
+        const angle = (i / 22) * 2 * Math.PI;
+        const dist = 80 + Math.random() * 160;
+        dot.style.cssText = `
+          left:${cx}px; top:${cy}px;
+          background:${colors[i % colors.length]};
+          --tx:${Math.cos(angle)*dist}px;
+          --ty:${Math.sin(angle)*dist}px;
+          animation-delay:${Math.random()*0.2}s;
+        `;
+        document.body.appendChild(dot);
+        setTimeout(() => dot.remove(), 1500);
+      }
+    }, 900);
+
+    /* Stage 5: Fade landing out, show grid */
+    queueEnvelopeStep(() => {
+      landing.classList.add('fade-out');
+      queueEnvelopeStep(() => {
+        landing.style.display = 'none';
+        gridPage.style.display = 'block';
+        buildGrid(); spawnPetals();
+        landing.classList.remove('is-opening');
+        envelopeAnimating = false;
+      }, 700);
+    }, 1700);
+  }
+
+  function openLetter(i) {
+    opened.add(i);
+    const l = letters[i];
+    const bg = document.getElementById('letterBg');
+    bg.className = 'letter-bg ' + l.theme;
+
+    document.querySelectorAll('.sparkle').forEach(s => s.remove());
+
+    const lp = document.getElementById('letter-page');
+    l.sparkles.forEach((s, idx) => {
+      const el = document.createElement('div');
+      el.className = 'sparkle';
+      el.textContent = s;
+      el.style.cssText = `left:${10+idx*20}%;top:${15+idx*12}%;animation-delay:${idx*0.5}s;`;
+      lp.appendChild(el);
+    });
+
+    document.getElementById('letterImg').textContent = l.img;
+    document.getElementById('letterText').textContent = l.text;
+
+    document.getElementById('grid-page').style.display = 'none';
+    lp.style.display = 'block';
+  }
+
+  function spawnPetals() {
+    document.querySelectorAll('.petal-float').forEach(p => p.remove());
+    const petals = ['🌸','❀','✽','🌺','❋'];
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      p.className = 'petal-float';
+      p.textContent = petals[Math.floor(Math.random() * petals.length)];
+      p.style.cssText = `
+        left: ${Math.random()*100}%;
+        animation-duration: ${6+Math.random()*8}s;
+        animation-delay: ${Math.random()*6}s;
+        font-size: ${0.7+Math.random()*0.8}rem;
+        opacity: 0;
+      `;
+      document.body.appendChild(p);
+    }
+  }
+</script>
+</body>
+</html>
